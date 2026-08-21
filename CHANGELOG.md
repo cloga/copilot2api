@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-08-21
+
+### Bug Fixes
+
+- Remove the proxy's arbitrary 10 MiB incoming request-body limit; oversized requests now reach Copilot so the upstream API can apply its model-specific validation
+
 ## [0.6.0] - 2026-08-03
 
 ### Features

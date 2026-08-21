@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -246,6 +247,36 @@ func TestHandler_HandlePassthrough(t *testing.T) {
 	}
 	if got["object"] != "chat.completion" {
 		t.Fatalf("expected object 'chat.completion', got %v", got["object"])
+	}
+}
+
+func TestHandler_HandlePassthrough_AllowsBodyLargerThanFormerLimit(t *testing.T) {
+	var receivedSize int
+	fakeUpstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Errorf("read upstream request body: %v", err)
+		}
+		receivedSize = len(body)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"ok":true}`))
+	}))
+	defer fakeUpstream.Close()
+
+	payload := `{"model":"gpt-4","messages":[{"role":"user","content":"` + strings.Repeat("x", 10<<20) + `"}],"stream":false}`
+	tp := &stubTokenProvider{baseURL: fakeUpstream.URL}
+	h := &Handler{upstream: upstream.NewClient(tp, nil, false)}
+	req := httptest.NewRequest("POST", "/v1/chat/completions", strings.NewReader(payload))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	h.handlePassthrough(rec, req, "/chat/completions")
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d; body: %s", rec.Code, rec.Body.String())
+	}
+	if receivedSize <= 10<<20 {
+		t.Fatalf("expected upstream request body larger than 10 MiB, got %d bytes", receivedSize)
 	}
 }
 
