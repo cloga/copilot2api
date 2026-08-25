@@ -138,6 +138,12 @@ COPILOT2API_MODEL_ROUTES='{"codex-auto-review":"gpt-5.6-luna","my-model":"gpt-5.
 
 Routes apply to OpenAI-compatible `/v1/responses` and `/v1/chat/completions` requests before endpoint capability routing. Matching is exact and one-hop; `{}` explicitly disables the built-in routes. The alias is not added to `/v1/models`, and the upstream response is passed through unchanged.
 
+## Usage with DeepSeek Harness
+
+DeepSeek Harness (DSH) can use Copilot2API as an OpenAI Responses provider together with [`dsh-web-search-provider`](https://github.com/cloga/dsh-web-search-provider). The integration keeps hosted web search on `/v1/responses`, preserves DSH's official vision path, and exposes the complete upstream model metadata through `/v1/models`.
+
+See the [DeepSeek Harness integration guide](docs/deepseek-harness-integration.md) for the verified topology, secure placeholder configuration, and component ownership boundaries. No Copilot2API functional changes are required for this integration.
+
 ## Usage with Gemini CLI
 
 Add to `~/.gemini/.env`:

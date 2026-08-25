@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Docs
+
+- Document DeepSeek Harness integration through `dsh-web-search-provider`, including hosted search, official vision handling, complete model metadata, secure configuration, and component ownership boundaries
+
 ## [0.6.1] - 2026-08-21
 
 ### Bug Fixes
